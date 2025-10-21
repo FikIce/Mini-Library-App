@@ -1,0 +1,34 @@
+﻿@model MiniLibraryMVC.Models.Member
+
+@{
+    ViewData["Title"] = "Register as New Member";
+}
+
+<h2>👤 Register New Member</h2>
+
+<form asp-action="RegisterNewMember" method="post" class="mt-4">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label">Name</label>
+        <input asp-for="Name" class="form-control" placeholder="Enter your full name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ICNumber" class="form-label">IC Number</label>
+        <input asp-for="ICNumber" class="form-control" placeholder="Enter your IC number" />
+        <span asp-validation-for="ICNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email address" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

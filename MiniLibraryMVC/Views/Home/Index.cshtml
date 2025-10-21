@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+    Layout = "_Layout"; // Or your main layout file
+}
+
+<div class="text-center" style="padding: 8rem 0;">
+    <h1 class="display-4 fw-bold">Welcome to MiniLibrary</h1>
+    <p class="lead text-muted mt-3 mb-4">A clean, simple, and efficient library management system.</p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <a asp-controller="Login" asp-action="Index" class="btn btn-primary btn-lg px-4 gap-3">Member Login</a>
+        <a asp-controller="Member" asp-action="RegisterNewMember" class="btn btn-secondary btn-lg px-4">Register</a>
+    </div>
+</div>

@@ -1,0 +1,57 @@
+﻿@model List<MiniLibraryMVC.Models.Book>
+
+@{
+    ViewBag.Title = "Available Books";
+    string memberIC = ViewBag.MemberIC as string;
+    int count = 1; // for numbering
+}
+
+<h2>Available Books</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Num</th> <!-- New column for numbering -->
+            <th>ISBN</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Available Copies</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any(b => b.AvailableCopies > 0))
+        {
+            <tr>
+                <td colspan="6">No books available to borrow.</td>
+            </tr>
+        }
+        else
+        {
+            foreach (var book in Model)
+            {
+                if (book.AvailableCopies > 0)
+                {
+                    <tr>
+                        <td>@count</td>
+                        <td>@book.ISBN</td>
+                        <td>@book.Title</td>
+                        <td>@book.Author</td>
+                        <td>@book.AvailableCopies</td>
+                        <td>
+                            <form asp-action="BorrowBook" method="post">
+                                <input type="hidden" name="bookId" value="@book.ISBN" />
+                                <button type="submit" class="btn btn-primary">Borrow</button>
+                            </form>
+                        </td>
+                    </tr>
+                    count++; // increment for the next row
+                }
+            }
+        }
+    </tbody>
+</table>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>

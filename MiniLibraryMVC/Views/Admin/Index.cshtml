@@ -1,0 +1,193 @@
+﻿@model MiniLibraryMVC.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link @(Model.ActiveTab == "stats" ? "active" : "")" asp-action="Index" asp-route-tab="stats">📊 Dashboard Stats</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.ActiveTab == "books" ? "active" : "")" asp-action="Index" asp-route-tab="books">📚 Book Management</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(Model.ActiveTab == "members" ? "active" : "")" asp-action="Index" asp-route-tab="members">👤 Member Activity</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    <div class="tab-pane fade @(Model.ActiveTab == "stats" ? "show active" : "")">
+        <div class="row mt-3">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Library Overview</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="overviewBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Book Status</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade @(Model.ActiveTab == "books" ? "show active" : "")">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>All Books in Collection</h4>
+            <a asp-action="AddBook" class="btn btn-primary">➕ Add New Book</a>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Copies (Available / Total)</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var book in Model.AllBooks)
+                        {
+                            <tr>
+                                <td>@book.Title</td>
+                                <td>@book.Author</td>
+                                <td>
+                                    @book.AvailableCopies / @book.TotalCopies
+                                    @if (book.AvailableCopies < book.TotalCopies)
+                                    {
+                                        <span class="badge bg-warning ms-2">Borrowed</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a href="#" class="btn btn-sm btn-secondary">Edit</a>
+                                    <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade @(Model.ActiveTab == "members" ? "show active" : "")">
+        <h4>Member Borrowing Activity</h4>
+        <div class="accordion mt-3" id="memberAccordion">
+            @foreach (var memberInfo in Model.MemberBorrowings)
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@memberInfo.MemberName.Replace(" ", "")">
+                            @memberInfo.MemberName
+                            <span class="badge bg-primary rounded-pill ms-auto me-2">@memberInfo.BorrowedBooks.Count() books borrowed</span>
+                        </button>
+                    </h2>
+                    <div id="collapse-@memberInfo.MemberName.Replace(" ", "")" class="accordion-collapse collapse" data-bs-parent="#memberAccordion">
+                        <div class="accordion-body">
+                            @if (memberInfo.BorrowedBooks.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var book in memberInfo.BorrowedBooks)
+                                    {
+                                        <li class="list-group-item">@book.Title <small class="text-muted">by @book.Author</small></li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted">This member has not borrowed any books.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // This function runs when the page is fully loaded.
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Securely pass data from your C# ViewModel to JavaScript
+            const statsData = @Json.Serialize(Model.Stats);
+
+            // --- 1. Create the Bar Chart ---
+            const barCtx = document.getElementById('overviewBarChart').getContext('2d');
+            const overviewBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Titles', 'Total Copies', 'Members', 'Borrowed'],
+                    datasets: [{
+                        label: 'Library Metrics',
+                        data: [
+                            statsData.totalBookTitles,
+                            statsData.totalCopies,
+                            statsData.membersCount,
+                            statsData.borrowedCount
+                        ],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(255, 99, 132, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Hide legend as the chart is self-explanatory
+                        }
+                    }
+                }
+            });
+
+            // --- 2. Create the Pie Chart ---
+            const pieCtx = document.getElementById('statusPieChart').getContext('2d');
+            const statusPieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Available Copies', 'Borrowed Copies'],
+                    datasets: [{
+                        label: 'Book Status',
+                        data: [statsData.availableCount, statsData.borrowedCount],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(255, 99, 132, 0.7)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                }
+            });
+        });
+    </script>
+}

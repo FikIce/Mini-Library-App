@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 shadow p-4 rounded" style="background-color: #f9f9f9;">
+            <h3 class="text-center mb-4">Library Login</h3>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <form asp-action="Login" method="post">
+                <div class="mb-3">
+                    <label>User Type</label>
+                    <select class="form-control" name="userType" required>
+                        <option value="">-- Select User Type --</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Member">Member</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label>Username (IC for Member)</label>
+                    <input type="text" class="form-control" name="username" required />
+                </div>
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" class="form-control" name="password" required />
+                </div>
+                <div class="text-center mb-3">
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </div>
+            </form>
+            <div class="text-center mb-3">
+                <a asp-action="RegisterNewMember" class="btn btn-secondary w-100 text-decoration-none">Register New Member</a>
+            </div>
+        </div>
+    </div>
+</div>

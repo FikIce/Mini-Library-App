@@ -1,0 +1,102 @@
+﻿@using System.Linq
+@model IEnumerable<MiniLibraryMVC.Models.ViewBorrowedBooks>
+
+@{
+    ViewData["Title"] = "Member Dashboard";
+    string memberName = ViewBag.MemberName ?? "Member";
+    int count = 1; // for numbering
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<h2>Welcome, @memberName</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Search" method="get" class="d-flex gap-2">
+            <input type="text" name="keyword" class="form-control" placeholder="Search your borrowed books..." />
+            <button type="submit" class="btn btn-secondary flex-shrink-0">Search</button>
+            <a asp-action="MemberBorrowing" class="btn btn-primary flex-shrink-0">Borrow New Book</a>
+        </form>
+    </div>
+</div>
+
+<h4>My Borrowed Books</h4>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">You have no books borrowed at the moment.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var book in Model)
+                    {
+                        <tr>
+                            <td>@count</td>
+                            <td>@book.Title</td>
+                            <td>@book.Author</td>
+                            <td>@book.BorrowDate.ToShortDateString()</td>
+                            @if (book.DueDate < DateTime.Now)
+                            {
+                                <td class="text-danger fw-bold">@book.DueDate.ToShortDateString() (Overdue)</td>
+                            }
+                            else
+                            {
+                                <td>@book.DueDate.ToShortDateString()</td>
+                            }
+                            <td>
+                                <form asp-action="ReturnBook" method="post">
+                                    <input type="hidden" name="ISBN" value="@book.ISBN" />
+                                    <button type="submit" class="btn btn-success btn-sm">Return</button>
+                                </form>
+                            </td>
+                        </tr>
+                        count++;
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<nav>
+    <ul class="pagination justify-content-center mt-4">
+
+        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage - 1)">Previous</a>
+        </li>
+
+        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+        {
+            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+            </li>
+        }
+
+        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(ViewBag.CurrentPage + 1)">Next</a>
+        </li>
+
+    </ul>
+</nav>
